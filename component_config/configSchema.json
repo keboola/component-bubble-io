@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "title": "extractor configuration",
+  "required": [
+    "api_url",
+    "#api_token",
+    "fields",
+    "period_from"
+  ],
+  "properties": {
+    "api_url": {
+      "type": "string",
+      "title": "API url",
+      "description": "URL of the Bubble.io Data API, e.g. https://[appname].bubbleapps.io/api/1.1/obj or https://[yourdomain].com/api/1.1/obj",
+      "propertyOrder": 100,
+      "default": "https://[appname].bubbleapps.io/api/1.1/obj"
+    },
+    "#api_token": {
+      "type": "string",
+      "title": "API token",
+      "format": "password",
+      "propertyOrder": 200
+    },
+    "fields": {
+      "type": "array",
+      "title": "Objects",
+      "description": "Your Bubble.io data objects / endpoints to retrieve",
+      "items": {
+        "format": "grid",
+        "type": "object",
+        "title": "Items of array, multiple objects",
+        "required": [
+          "name",
+          "fields",
+          "incremental"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Object name",
+            "description": "Name of the object / data api endpoint as defined in the Bubble.io UI.",
+            "propertyOrder": 10
+          },
+          "incremental": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "options": {
+              "enum_titles": [
+                "Full Load",
+                "Incremental Update"
+              ],
+              "grid_columns": 3
+            },
+            "default": 1,
+            "title": "Load type",
+            "description": "If set to Incremental update, the result tables will be updated based on primary key. Full load overwrites the destination table each time.",
+            "propertyOrder": 20
+          },
+          "period_from": {
+            "type": "string",
+            "title": "Period from date [exclusive]",
+            "description": "Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. If left empty, all records are downloaded.",
+            "propertyOrder": 25
+          },
+          "fields": {
+            "type": "string",
+            "format": "textarea",
+            "options": {
+              "input_height": "100px",
+              "grid_columns": 10
+            },
+            "title": "Object fields",
+            "description": "Comma separated list of fields to extract from the object, each value has to be enclosed in \" double quote characters. e.g \"Name\", \"Value\". Note that system fields [\"_id\", \"_type\", \"Creator\", \"Created Date\", \"Modified Date\"] are always included by default",
+            "propertyOrder": 30
+          }
+        }
+      }
+    }
+  }
+}
