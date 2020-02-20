@@ -47,6 +47,18 @@ if you include them nevertheless it won't have any effect.
 
 **Example value**: `"UserName","Value", "Cost"`
 
+# Results
+
+Each endpoint will output a single table named as the endpoint name. Apart from selected columns each table will include 
+following system columns by default, regardless the `fields` parameter setup:
+
+`Creator`, `Created Date`, `Modified Date`, `_id`, `_type`
+
+**NOTE** KBC Storage cannot store `_` prefixed columns so these will be prefixed with `bubbleinternal` prefix. 
+
+Therefore each table will contain: `Creator`, `Created Date`, `Modified Date`, `bubbleinternal_id`, `bubbleinternal_type` 
+columns.
+
  
 # Development
  
