@@ -21,9 +21,16 @@
       "format": "password",
       "propertyOrder": 200
     },
+    "period_from": {
+      "type": "string",
+      "title": "Period from date [exclusive]",
+      "description": "Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. If left empty, all records are downloaded.",
+      "propertyOrder": 210
+    },
     "fields": {
       "type": "array",
       "title": "Objects",
+      "propertyOrder": 310,
       "description": "Your Bubble.io data objects / endpoints to retrieve",
       "items": {
         "format": "grid",
@@ -58,12 +65,6 @@
             "title": "Load type",
             "description": "If set to Incremental update, the result tables will be updated based on primary key. Full load overwrites the destination table each time.",
             "propertyOrder": 20
-          },
-          "period_from": {
-            "type": "string",
-            "title": "Period from date [exclusive]",
-            "description": "Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. If left empty, all records are downloaded.",
-            "propertyOrder": 25
           },
           "fields": {
             "type": "string",
