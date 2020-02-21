@@ -25,14 +25,14 @@
     "period_from": {
       "type": "string",
       "title": "Period from date [exclusive]",
-      "description": "Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. If left empty, all records are downloaded.",
+      "description": "Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. If left empty, no boundary is set.",
       "propertyOrder": 210
     },
     "period_to": {
       "type": "string",
       "default": "today",
       "title": "Period to date [inclusive]",
-      "description": "Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. If left empty, all records are downloaded.",
+      "description": "Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. If left empty, no boundary is set.",
       "propertyOrder": 215
     },
     "endpoints": {
