@@ -27,6 +27,7 @@ KEY_ENDPOINT_PKEY = 'pkey'
 KEY_ENPOINT_FIELDS = 'fields'
 KEY_ENDPOINTS_INCREMENTAL = 'incremental'
 KEY_FROM_DATE = 'period_from'
+KEY_TO_DATE = 'period_to'
 
 KEY_API_URL = 'api_url'
 
@@ -66,16 +67,19 @@ class Component(KBCEnvHandler):
         Main execution code
         '''
         params = self.cfg_params  # noqa
-        since_date = None
+
+        since_date = to_date = None
         if params.get(KEY_FROM_DATE):
-            since_date, to_date = self.get_date_period_converted(params[KEY_FROM_DATE], 'now')
+            since_date, dm = self.get_date_period_converted(params[KEY_FROM_DATE], 'today')
+        if params.get(KEY_TO_DATE):
+            dm, to_date = self.get_date_period_converted('100 years ago', params[KEY_TO_DATE])
 
         for en in params[KEY_ENDPOINTS]:
             en_name = en[KEY_ENDPOINT_NAME]
 
             logging.info(f'Getting results from {en_name} endpoint')
             writer = self.writers[en_name]
-            self.get_and_write_data(writer, en, since_date)
+            self.get_and_write_data(writer, en, since_date, to_date)
             # validation enforces unique endpoints
             writer.close()
             logging.info('Storing results..')
@@ -107,13 +111,21 @@ class Component(KBCEnvHandler):
 
         return writers
 
-    def get_and_write_data(self, writer, endpoint, since_date=None):
+    def get_and_write_data(self, writer, endpoint, since_date=None, to_date=None):
         params = {}
+        const = []
         if since_date:
-            const = [{"key": "Modified Date",
-                      "constraint_type": "greater than",
-                      "value": since_date.isoformat(timespec='milliseconds')
-                      }]
+            const.append({"key": "Modified Date",
+                          "constraint_type": "greater than",
+                          "value": since_date.isoformat(timespec='milliseconds')
+                          })
+        if to_date:
+            const.append({"key": "Modified Date",
+                          "constraint_type": "less than",
+                          "value": to_date.isoformat(timespec='milliseconds')
+                          })
+
+        if const:
             params = {"constraints": json.dumps(const)}
 
         for r in self.client.get_paged_result_pages(endpoint[KEY_ENDPOINT_NAME], params):

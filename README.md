@@ -20,10 +20,22 @@ Replace the placeholders  `[]` with your app specific values.
 
 Bubble API token.
 
-## Period from date
+## Modified date interval setup
+
+### Period from date
 
 [Exclusive] Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. 
-If left empty, all records are downloaded.
+If left empty, no boundary is set.
+
+### Period to date
+
+[Exclusive] Date in YYYY-MM-DD format or dateparser string i.e. 5 days ago, 1 month ago, yesterday, etc. 
+If left empty, no boundary is set.
+
+### **Important functionality note**
+
+In some cases the API might timeout on queries that return more than 50k results. For that reason the extraction will 
+fail asking you to limit the query by specifying lower interval.
 
 ## Objects
 
