@@ -101,7 +101,7 @@ class Component(KBCEnvHandler):
                     f'The provided list of columns for field "{e_name}": {e[KEY_ENPOINT_FIELDS]} is invalid! '
                     f'Check if all values are enclosed in " quote characters and separated by comma.')
 
-            table_def = KBCTableDef(e_name, fields, [SYSTEM_COL_PREFIX + '_id'])
+            table_def = KBCTableDef(e_name, fields, [SYSTEM_COL_PREFIX + '_id'], destination=None)
             folder_path = os.path.join(self.tables_out_path, e_name)
             if not os.path.exists(folder_path):
                 os.mkdir(folder_path)
