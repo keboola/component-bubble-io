@@ -14,12 +14,11 @@ class BaseError(Exception):
     """
 
     def __init__(self, msg, error_obj):
-        if isinstance(error_obj.get("error", {}), str):
-            Exception.__init__(self, msg + f' Error: {error_obj.get("error", {})}')
+        if isinstance(error_obj.get("body", {}), dict):
+            Exception.__init__(self, msg + f' Error: {error_obj.get("body", {}).get("message")}')
             self.error_obj = {}
         else:
-            Exception.__init__(self, msg + f' Error: {error_obj.get("error", {}).get("message")}'
-                                           f', error code: {error_obj.get("error", {}).get("code")}')
+            Exception.__init__(self, msg + f' Error: {error_obj}')
         self.error_obj = error_obj
 
 
