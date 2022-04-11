@@ -87,6 +87,8 @@ class Component(KBCEnvHandler):
             self.fix_headers(results, SYSTEM_COL_PREFIX)
             self.create_manifests(results, headless=True, incremental=en[KEY_ENDPOINTS_INCREMENTAL])
 
+        # remove empty folders for empty results
+        self._remove_empty_folders()
         logging.info('Finished!')
 
     def _setup_writers(self, endpoints):
@@ -101,7 +103,7 @@ class Component(KBCEnvHandler):
                     f'The provided list of columns for field "{e_name}": {e[KEY_ENPOINT_FIELDS]} is invalid! '
                     f'Check if all values are enclosed in " quote characters and separated by comma.')
 
-            table_def = KBCTableDef(e_name, fields, [SYSTEM_COL_PREFIX + '_id'])
+            table_def = KBCTableDef([SYSTEM_COL_PREFIX + '_id'], fields, e_name, '')
             folder_path = os.path.join(self.tables_out_path, e_name)
             if not os.path.exists(folder_path):
                 os.mkdir(folder_path)
@@ -128,8 +130,13 @@ class Component(KBCEnvHandler):
         if const:
             params = {"constraints": json.dumps(const)}
 
+        results = 0
         for r in self.client.get_paged_result_pages(endpoint[KEY_ENDPOINT_NAME], params):
+            results += len(r)
             writer.write_all(r, write_header=False)
+        if results == 0:
+            logging.warning(f"Endpoint {endpoint['name']} returned 0 results "
+                            f"for the specified period {since_date} - {to_date}")
 
     def fix_headers(self, results, prefix):
         for r in results:
@@ -163,6 +170,14 @@ class Component(KBCEnvHandler):
                                                         r.table_def.columns, incremental,
                                                         r.table_def.metadata,
                                                         r.table_def.column_metadata)
+
+    def _remove_empty_folders(self):
+        folders = list(os.walk(self.tables_out_path))[1:]
+
+        for folder in folders:
+            # folder example: ('FOLDER/3', [], ['file'])
+            if not folder[2]:
+                os.rmdir(folder[0])
 
     def _append_system_fields(self, fields):
 
