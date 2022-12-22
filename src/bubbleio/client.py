@@ -43,7 +43,7 @@ class Client(HttpClientBase):
                 params["constraints"] = json.dumps(const)
             return params
 
-        next_url = self.base_url + endpoint
+        next_url = self.base_url.rstrip('/') + '/' + endpoint
         query_params = calc_params()
 
         while True:
