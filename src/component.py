@@ -17,7 +17,6 @@ from bubbleio.client import Client
 
 # global constants'
 SYSTEM_COL_PREFIX = 'bubbleinternal'
-SUPPORTED_ENDPOINTS = ['companies', 'deals']
 
 # configuration variables
 KEY_API_TOKEN = '#api_token'

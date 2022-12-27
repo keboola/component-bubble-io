@@ -14,12 +14,10 @@ class BaseError(Exception):
     """
 
     def __init__(self, msg, error_obj):
-        if isinstance(error_obj.get("body", {}), dict):
+        if isinstance(error_obj, dict):
             Exception.__init__(self, msg + f' Error: {error_obj.get("body", {}).get("message")}')
-            self.error_obj = {}
         else:
-            Exception.__init__(self, msg + f' Error: {error_obj}')
-        self.error_obj = error_obj
+            Exception.__init__(self, msg + f' Error: {str(error_obj)[:100].replace(chr(10)," ")}')
 
 
 class UnknownError(BaseError):
@@ -35,7 +33,8 @@ class BadRequest(BaseError):
 
 
 class Unauthorized(BaseError):
-    pass
+    def __init__(self, msg):
+        Exception.__init__(self, msg)
 
 
 class Forbidden(BaseError):
@@ -43,7 +42,14 @@ class Forbidden(BaseError):
 
 
 class NotFound(BaseError):
-    pass
+    def __init__(self, endpoint: str, error_obj: any):
+        error_message = 'Not found'
+        if isinstance(error_obj, dict) and error_obj.get("body", {}).get("message"):
+            error_message = error_obj['body']['message']
+            if endpoint in error_message:
+                Exception.__init__(self, f'Endpoint {endpoint} was not found, check Object name entry field')
+                return
+        Exception.__init__(self, f'Error when calling endpoint {endpoint} : {error_message}. Check API url entry')
 
 
 class MethodNotAllowed(BaseError):

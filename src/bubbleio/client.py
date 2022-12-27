@@ -79,11 +79,11 @@ class Client(HttpClientBase):
         elif status_code == 400:
             raise exceptions.BadRequest(f'Calling endpoint {endpoint} failed', r)
         elif status_code == 401:
-            raise exceptions.Unauthorized(f'Calling endpoint {endpoint} failed', r)
+            raise exceptions.Unauthorized(f'Calling endpoint {endpoint} unauthorized - check API token entry')
         elif status_code == 403:
             raise exceptions.Forbidden(f'Calling endpoint {endpoint} failed', r)
         elif status_code == 404:
-            raise exceptions.NotFound(f'Calling endpoint {endpoint} failed', r)
+            raise exceptions.NotFound(endpoint, r)
         elif status_code == 405:
             raise exceptions.MethodNotAllowed(f'Calling endpoint {endpoint} failed', r)
         elif status_code == 406:
