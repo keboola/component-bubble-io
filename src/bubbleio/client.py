@@ -1,11 +1,16 @@
+import json
+from datetime import timedelta
+from dateutil import parser
+
 from kbc.client_base import HttpClientBase
 
-from bubbleio import exceptions
+from . import exceptions
 
 
 class Client(HttpClientBase):
     MAX_RETRIES = 10
     MAX_LIMIT = 100
+    MODIFIED_DATE = "Modified Date"
 
     def __init__(self, base_url, api_token):
         HttpClientBase.__init__(self, base_url=base_url, max_retries=self.MAX_RETRIES, backoff_factor=0.3,
@@ -15,25 +20,51 @@ class Client(HttpClientBase):
         self._auth_header = {"Authorization": 'Bearer ' + api_token,
                              "Content-Type": "application/json"}
 
-    def get_paged_result_pages(self, endpoint, parameters, cursor=0):
+    def get_paged_result_pages(self, endpoint, since_date, to_date, cursor=0):
 
-        has_more = True
-        next_url = self.base_url + endpoint
-        paging_params = {"cursor": cursor,
-                         "limit": self.MAX_LIMIT}
-        query_params = {**parameters, **paging_params}
-        while has_more:
+        def calc_params():
+            params = {
+                "cursor": None,  # will be assigned prior to a request
+                "limit": self.MAX_LIMIT,
+                "sort_field": self.MODIFIED_DATE
+            }
+            const = []
+            if since_date:
+                const.append({"key": "Modified Date",
+                              "constraint_type": "greater than",
+                              "value": since_date.isoformat(timespec='milliseconds')
+                              })
+            if to_date:
+                const.append({"key": "Modified Date",
+                              "constraint_type": "less than",
+                              "value": to_date.isoformat(timespec='milliseconds')
+                              })
+            if const:
+                params["constraints"] = json.dumps(const)
+            return params
+
+        next_url = self.base_url.rstrip('/') + '/' + endpoint
+        query_params = calc_params()
+
+        while True:
             query_params['cursor'] = cursor
             resp = self.get_raw(next_url, params=query_params)
             req_response = self._parse_response(resp, endpoint)
-
-            if req_response['response']['remaining'] != 0:
-                has_more = True
-                cursor += self.MAX_LIMIT
+            remaining = req_response['response']['remaining']
+            results = req_response['response']['results']
+            if results:
+                yield results
+            if not remaining:
+                break
+            if results:
+                last_date = results[-1][self.MODIFIED_DATE]
+            if len(results) < self.MAX_LIMIT:
+                last = parser.parse(last_date)
+                since_date = last - timedelta(milliseconds=1)
+                cursor = 0
+                query_params = calc_params()
             else:
-                has_more = False
-
-            yield req_response['response']['results']
+                cursor += self.MAX_LIMIT
 
     def _parse_response(self, response, endpoint):
         status_code = response.status_code
@@ -48,11 +79,11 @@ class Client(HttpClientBase):
         elif status_code == 400:
             raise exceptions.BadRequest(f'Calling endpoint {endpoint} failed', r)
         elif status_code == 401:
-            raise exceptions.Unauthorized(f'Calling endpoint {endpoint} failed', r)
+            raise exceptions.Unauthorized(f'Calling endpoint {endpoint} unauthorized - check API token entry')
         elif status_code == 403:
             raise exceptions.Forbidden(f'Calling endpoint {endpoint} failed', r)
         elif status_code == 404:
-            raise exceptions.NotFound(f'Calling endpoint {endpoint} failed', r)
+            raise exceptions.NotFound(endpoint, r)
         elif status_code == 405:
             raise exceptions.MethodNotAllowed(f'Calling endpoint {endpoint} failed', r)
         elif status_code == 406:

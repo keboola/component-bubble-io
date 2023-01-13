@@ -17,7 +17,6 @@ from bubbleio.client import Client
 
 # global constants'
 SYSTEM_COL_PREFIX = 'bubbleinternal'
-SUPPORTED_ENDPOINTS = ['companies', 'deals']
 
 # configuration variables
 KEY_API_TOKEN = '#api_token'
@@ -114,24 +113,8 @@ class Component(KBCEnvHandler):
         return writers
 
     def get_and_write_data(self, writer, endpoint, since_date=None, to_date=None):
-        params = {}
-        const = []
-        if since_date:
-            const.append({"key": "Modified Date",
-                          "constraint_type": "greater than",
-                          "value": since_date.isoformat(timespec='milliseconds')
-                          })
-        if to_date:
-            const.append({"key": "Modified Date",
-                          "constraint_type": "less than",
-                          "value": to_date.isoformat(timespec='milliseconds')
-                          })
-
-        if const:
-            params = {"constraints": json.dumps(const)}
-
         results = 0
-        for r in self.client.get_paged_result_pages(endpoint[KEY_ENDPOINT_NAME], params):
+        for r in self.client.get_paged_result_pages(endpoint[KEY_ENDPOINT_NAME], since_date, to_date):
             results += len(r)
             writer.write_all(r, write_header=False)
         if results == 0:
